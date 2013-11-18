@@ -2,15 +2,19 @@ MariaDB 5.5 Galera
 ==================
 
 A reasonably simple Ubuntu 12.04 LTS container with the pieces to form
-a MariaDB 5.5 Galera cluster. It's based on Nick Stenning's MariaDB
-5.5 container for MariaDB 5.5, and adds in default support for X.509
-based administrative authentication.
+a MariaDB 5.5 Galera cluster. It's based on Nick Stenning's container
+for MariaDB 5.5, and adds in default support for X.509 based
+administrative authentication.
 
 (Repeating the warning from Nick S)
 
 **NB**: Please be aware that by default docker will make the MariaDB
 port accessible from anywhere if the host firewall is unconfigured. It
-also exposes the Galera wsrep port (by default 4567) globally.
+also exposes the Galera wsrep port (by default 4567) globally, as well
+as the snapshot transfer port (default 4444). Care should be taken,
+perhaps, to firewall off these ports at the docker root level. While
+port 3306 might need wider exposure, ports 4567 and 4444 have no need
+to be exposed to anything other than members of the cluster.
 
 The root password for the first node (and therefore the entire
 cluster) is randomly generated. This password can only be used to
@@ -38,8 +42,8 @@ contain 3 files:
 The data volume must be mounted at the container directory
 `/var/lib/mysql`.
 
-The SSL volume must be mounted at the container directory
-`/etc/ssl/mysql`.
+The SSL volume must be mounted (ideally read-only) at the container
+directory `/etc/ssl/mysql`.
 
 Within the SSL volume there should also be a directory called `root`
 which will contain a set of *client* certificates with names like
@@ -68,6 +72,17 @@ e.g.
 cat /data/mysql-node-1/rootpw.pem | openssl smime -decrypt -inkey
 ~/ssl-keys/joe-root-key.pem
 
+Note that this prints the root password to standard output. You might
+feel better outputting the key into a keyutils key, e.g.
+
+cat /data/mysql-node-1/rootpw.pem | openssl smime -decrypt -inkey
+~/ssl-keys/joe-root-key.pem | keyutil padd user mysql-root @us
+
+This can then be used from the mysql command line like so
+
+mysql -uroot -p$(keyctl pipe mysql-root) -h localhost
+
+When your login session ends, the key will then be reaped.
 
 Example Usage
 -------------

@@ -37,7 +37,7 @@ run	rm -r /var/lib/mysql
 add	./my-cluster.cnf /etc/mysql/my-cluster.cnf
 add     ./my-init.cnf /etc/mysql/my-init.cnf
 
-expose	3306 4567
+expose	3306 4567 4444
 
 add	./mariadb-setrootpassword /usr/bin/mariadb-setrootpassword
 add	./mariadb-start /usr/bin/mariadb-start
