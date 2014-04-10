@@ -64,13 +64,17 @@ Decrypting the Root Password
 If you need to recover the root password, and you are the holder of
 one of the root keys in /etc/ssl/mysql/root, then execute
 
+```
 $ cat _/path/to/mysql-dir/_rootpw.pem | openssl smime -decrypt -inkey
 _path/to/private-key.pem_
+```
 
 e.g.
 
+```
 cat /data/mysql-node-1/rootpw.pem | openssl smime -decrypt -inkey
 ~/ssl-keys/joe-root-key.pem
+```
 
 Note that this prints the root password to standard output. You might
 feel better outputting the key into a keyutils key, e.g.
@@ -97,10 +101,12 @@ first node standup, /data/mysql should be empty.
 
 # Boot the first node in standalone mode #
 
+```
 DBID=$(sudo docker run -d -v /data/mysql:/var/lib/mysql \
        -v /data/mysql-ssl:/etc/ssl/mysql \
-       -p 3306:3306 -e CLUSTER=BOOT ndunbar/mariadb55 \
+       -p 3306:3306 -e CLUSTER=BOOT ndunbar/mariadb55-galera \
        mariadb-start)
+```
 
 (Note: no need to expose ports 4567 and 4444 - no-one is talking to
 anyone just yet)
@@ -122,12 +128,14 @@ This should (gracefully) stop the standalone mode MariaDB node
 
 To begin the cluster, you need a single node as a catch-all donor.
 
-DBID=$(sudo docker run -d /data/mysql:/var/lib/mysql \
+```
+DBID=$(sudo docker run -d -v /data/mysql:/var/lib/mysql \
        -v /data/mysql-ssl:/etc/ssl/mysql \
        -p 3306:3306 -p 4567:4567 -p 4444:4444 \
        -e CLUSTER=INIT \
-       -e NODE_ADDR=my.host.name ndunbar/mariadb55 \
+       -e NODE_ADDR=my.host.name ndunbar/mariadb55-galera \
        mariadb-start)
+```
 
 This should restart the server (with data intact) with the ability to
 use it to populate new nodes to fill out the cluster. Node that the
@@ -147,13 +155,15 @@ nodes are coming online.
 For each extra node that you need to turn up, set up the `/data/mysql`
 and `/data/mysql-ssl` directories as per the primary node, and execute
 
-DBID=$(sudo docker run -d /data/mysql:/var/lib/mysql \
+```
+DBID=$(sudo docker run -d -v /data/mysql:/var/lib/mysql \
        -v /data/mysql-ssl:/etc/ssl/mysql \
        -p 3306:3306 -p 4567:4567 -p 4444:4444 \
        -e CLUSTER= my.host.name,his.host.name,her.host.name \
        -e NODE=<node number> \
-       -e NODE_ADDR=my.host.name ndunbar/mariadb55 \
+       -e NODE_ADDR=my.host.name ndunbar/mariadb55-galera \
        mariadb-start)
+```
 
 where `<node number>` is some integer above 1, ideally sequential. The
 `his.host.name`, `her.host.name` etc. should be the other nodes in the
@@ -174,6 +184,7 @@ cluster.
 
 (On the server running the primary node)
 
+```
 sudo docker stop $DBID
 
 DBID=$(sudo docker run -d /data/mysql:/var/lib/mysql \
@@ -181,8 +192,9 @@ DBID=$(sudo docker run -d /data/mysql:/var/lib/mysql \
        -p 3306:3306 -p 4567:4567 -p 4444:4444 \
        -e CLUSTER= my.host.name,his.host.name,her.host.name \
        -e NODE=1 \
-       -e NODE_ADDR=my.host.name ndunbar/mariadb55 \
+       -e NODE_ADDR=my.host.name ndunbar/mariadb55-galera \
        mariadb-start)
+```
 
 [^1]: http://tinyca.sm-zone.net
 
