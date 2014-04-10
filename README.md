@@ -79,12 +79,16 @@ cat /data/mysql-node-1/rootpw.pem | openssl smime -decrypt -inkey
 Note that this prints the root password to standard output. You might
 feel better outputting the key into a keyutils key, e.g.
 
+```
 cat /data/mysql-node-1/rootpw.pem | openssl smime -decrypt -inkey
 ~/ssl-keys/joe-root-key.pem | keyutil padd user mysql-root @us
+```
 
 This can then be used from the mysql command line like so
 
+```
 mysql -uroot -p$(keyctl pipe mysql-root) -h localhost
+```
 
 When your login session ends, the key will then be reaped.
 
@@ -120,7 +124,9 @@ Assuming it went well, continue.
 
 # Stop the standalone mode #
 
+```
 sudo docker stop $DBID
+```
 
 This should (gracefully) stop the standalone mode MariaDB node
 
