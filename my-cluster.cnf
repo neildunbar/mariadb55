@@ -72,6 +72,10 @@ slow-query-log-file            = /var/lib/mysql/mysql-slow.log
 wsrep_provider                 = /usr/lib/galera/libgalera_smm.so
 wsrep_sst_method               = xtrabackup-v2
 
+wsrep_provider_options="gcache.size = 2G; gcs.fc_limit = 128; evs.send_window = 1024; evs.user_send_window = 512; evs.keepalive_period = PT3S; evs.inactive_check_period = PT10S; evs.suspect_timeout = PT30S; evs.inactive_timeout = PT1M; evs.consensus_timeout = PT1M;"
+
+
+
 [sst]
 streamfmt                      = xbstream
 transferfmt                    = socat
