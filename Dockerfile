@@ -13,8 +13,7 @@ run	echo "#!/bin/sh\nexit 101" >/usr/sbin/policy-rc.d
 run	chmod +x /usr/sbin/policy-rc.d
 
 # /etc/mtab is a symlink to /proc/mounts on some systems
-run	rm /etc/mtab
-run	cat /proc/mounts >/etc/mtab
+run	rm /etc/mtab && cat /proc/mounts >/etc/mtab
 
 # Install MariaDB
 run	apt-get -y update
