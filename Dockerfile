@@ -11,7 +11,9 @@ run     apt-key adv --recv-keys --keyserver keys.gnupg.net --recv-keys 1C4CBDCDC
 # Make apt and MariaDB happy with the docker environment
 run	echo "#!/bin/sh\nexit 101" >/usr/sbin/policy-rc.d
 run	chmod +x /usr/sbin/policy-rc.d
-run	cat /proc/mounts >/etc/mtab
+
+# /etc/mtab is a symlink to /proc/mounts on some systems
+run	rm /etc/mtab && cat /proc/mounts >/etc/mtab
 
 # Install MariaDB
 run	apt-get -y update
