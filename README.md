@@ -124,7 +124,7 @@ To begin the cluster, you need a single node as a catch-all donor.
 
 DBID=$(sudo docker run -d /data/mysql:/var/lib/mysql \
        -v /data/mysql-ssl:/etc/ssl/mysql \
-       -p 3306:3306 -p 4567:4567 -p 4444:4444 \
+       -p 3306:3306 -p 4567:4567 -p 4444:4444 -p 4568:4568 \
        -e CLUSTER=INIT \
        -e NODE_ADDR=my.host.name ndunbar/mariadb55 \
        mariadb-start)
@@ -135,7 +135,7 @@ primary component has a node number of 1 (this is fixed by scripting).
 
 Note that ports 4567 and 4444 are open. 4567 is the Galera clustering
 service, and 4444 is the service by which snapshots of the database
-are transferred across to bring a new node into sync. The current
+are transferred across to bring a new node into sync. We also need to expose the IST port 4568.The current
 container implementation uses Xtrabackup, encrypting the transfers via
 SSL between nodes. Xtrabackup has the nice property of not blocking
 the donor server (well, it does, but only for a very short time),
@@ -149,7 +149,7 @@ and `/data/mysql-ssl` directories as per the primary node, and execute
 
 DBID=$(sudo docker run -d /data/mysql:/var/lib/mysql \
        -v /data/mysql-ssl:/etc/ssl/mysql \
-       -p 3306:3306 -p 4567:4567 -p 4444:4444 \
+       -p 3306:3306 -p 4567:4567 -p 4444:4444 -p 4568:4568 \
        -e CLUSTER= my.host.name,his.host.name,her.host.name \
        -e NODE=<node number> \
        -e NODE_ADDR=my.host.name ndunbar/mariadb55 \
@@ -178,11 +178,15 @@ sudo docker stop $DBID
 
 DBID=$(sudo docker run -d /data/mysql:/var/lib/mysql \
        -v /data/mysql-ssl:/etc/ssl/mysql \
-       -p 3306:3306 -p 4567:4567 -p 4444:4444 \
+       -p 3306:3306 -p 4567:4567 -p 4444:4444 -p 4568:4568 \
        -e CLUSTER= my.host.name,his.host.name,her.host.name \
        -e NODE=1 \
        -e NODE_ADDR=my.host.name ndunbar/mariadb55 \
        mariadb-start)
+       
+  # Note on node IPs #
+  
+  When using the IP of the host machine, make sure to apply ```--net=host``` to your ```docker run``` command so that IST does not fail due to inability to assign the configured node IP address.
 
 [^1]: http://tinyca.sm-zone.net
 
